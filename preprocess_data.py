@@ -1,6 +1,5 @@
 import sys
 import pandas as pd
-import data_manipulation as dm
 import helper_functions as helper
 
 # Preprocessing data
@@ -54,7 +53,7 @@ def util_preprocessing(
     df = df.astype({'date':'datetime64[ns]'})
 
     # Clean up data 
-    df = dm.cleanup_data(
+    df = helper.cleanup_data(
         df=df, set_date_range=True, start_end_dates=start_end_dates, interpol_missing=True, interpol_dict=interpol_dict, rename_cols=True, columns_to_rename=columns_to_rename, replace_nan=True,
         columns_to_replace_nan=columns_to_replace_nan, change_dtypes=True, columns_dtype_change=columns_dtype_change, reset_index=True
     )
@@ -139,15 +138,15 @@ def util_preprocessing(
     df_formatted['date'] = df_formatted['date'].dt.strftime('%Y-%m-%d')
     df_formatted['ghs_used_phr'] = (
         df_formatted['ghs_used_phr']
-        .apply(lambda x: dm.format_decimal(x,3))
+        .apply(lambda x: helper.format_decimal(x,3))
     )
     for col in two_dec:
         df_formatted[col] = (
-            df_formatted[col].apply(lambda x: dm.format_decimal(x, 2))
+            df_formatted[col].apply(lambda x: helper.format_decimal(x, 2))
         )        
     for col in integer:
         df_formatted[col] = (
-            df_formatted[col].apply(lambda x: dm.format_decimal(x, 0))
+            df_formatted[col].apply(lambda x: helper.format_decimal(x, 0))
         )        
     df_formatted[columns_to_save].to_csv(
         outname, sep='\t', index=True, header=True
