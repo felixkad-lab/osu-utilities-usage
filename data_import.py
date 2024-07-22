@@ -2,8 +2,8 @@ import os
 import sys
 import pandas as pd
 import gspread
-#import psycopg2 as ps
 from google.oauth2 import service_account
+#import psycopg2 as ps
 
 # Get data from file
 def get_from_file(filename):
@@ -97,7 +97,8 @@ def load_utilities_data(
         df.to_csv(filename, sep='\t', header=True, index=False)        
         print("="*60)
         print(
-            f"Successfully retrieved {query['worksheet_name']} from " f"googlesheet and saved to {filename}\n"
+            f"Successfully retrieved {query['worksheet_name']} from " 
+            f"googlesheet and saved to {filename}\n"
         )
     
     # Load file directly from file
