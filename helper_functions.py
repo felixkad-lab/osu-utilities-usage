@@ -2,6 +2,7 @@
 import sys
 import math
 import pandas as pd
+import numpy as np
 from googleapiclient.errors import HttpError
 from stats_stuff import do_t_test, do_anova_test
 from google_calendar_helper import (
@@ -29,10 +30,12 @@ def cleanup_data(df=None, set_date_range=False, start_end_dates=None,
                  replace_nan=False, columns_to_replace_nan=None,
                  change_dtypes=False, columns_dtype_change=None,
                  reset_index=False):
-
     # Restrict data range to start and end dates
     if set_date_range:
-        df = df[(df['date'] >= start_end_dates[0]) & (df['date'] <= start_end_dates[1])]
+        df = df[
+            (df['date'] >= start_end_dates[0]) & 
+            (df['date'] <= start_end_dates[1])
+        ]
         print("Finished restricting data range")
         
     # Rename some columns
@@ -52,7 +55,9 @@ def cleanup_data(df=None, set_date_range=False, start_end_dates=None,
             if col == 'time':
                 df[col] = df[col].ffill()
             else:
-                df[col] = df[col].interpolate(method=method, limit_direction='forward', axis=0)
+                df[col] = df[col].interpolate(
+                    method=method, limit_direction='forward', axis=0
+                )
         print("Finished Interpolation for missing values")
         
     # Change some data types
@@ -87,6 +92,7 @@ def create_new_columns(
 # Normalize baseline to account for top ups
 def normalize_baseline(df, top_up, save_data_to):
     print("Finding dates when more credit was added\n")
+
     # Calculate difference between credit in subsequent days
     df['credit_diff'] = df['credit_ghs'] - df['credit_ghs'].shift(1)
 
@@ -121,8 +127,7 @@ def normalize_baseline(df, top_up, save_data_to):
     # Save topup dates and amounts to file
     topup_df.to_csv(save_data_to, sep='\t', index=True, header=True)
 
-    # Grab latest date
-    #latest_topup_amount = topup_df.iloc[-1]['topup_amount']
+    # Grab latest top up date
     latest_topup_date = topup_df.iloc[-1]['date']
     latest_topup_date = latest_topup_date.strftime('%Y-%m-%d')
     
@@ -149,7 +154,7 @@ def calc_time_elapsed(df):
     df['time_elapsed'] = df['datetime'] - df['datetime'].shift(1)
     df = df.drop(['datetime'], axis=1)
     
-    ## Convert elapsed time to hours (shift up one)
+    # Convert elapsed time to hours (shift up one)
     df['time_elapsed'] = (
         df['time_elapsed']
         .apply(lambda x: x.total_seconds() / 3600)
@@ -291,25 +296,29 @@ def calc_weekly_usage(df=None, outname=None):
     weekly = weekly[cols]
     
     # Calculate ghs_used
-    weekly['ghs_used'] = weekly['credit_ghs_fixed'] - weekly['credit_ghs_fixed'].shift(-1)
+    weekly['ghs_used'] = (
+        weekly['credit_ghs_fixed'] - weekly['credit_ghs_fixed'].shift(-1)
+    )
     
     # Save data
     weekly.to_csv(outname, sep='\t', index=True, header=True)
-
     return weekly
 
 # Calculate usage by month and graph
 def calc_monthly_usage(prefix, df=None, top_up=None, outname=None):        
     print("="*60)
     print("Performing Monthly Analysis of credit used\n")
+
     # Filter dataframe for only first of month
     first_of_month = df[df['date'].dt.day == 1]
     first_of_month = first_of_month.copy()
-    first_of_month['next_month'] = (first_of_month['date']
-                                    + pd.offsets.MonthBegin(1))
+    first_of_month['next_month'] = (
+        first_of_month['date']+ pd.offsets.MonthBegin(1)
+    )
     
     monthly = pd.merge(
-        first_of_month, df, left_on='next_month', right_on='date', suffixes=('_1st', '_subseq')
+        first_of_month, df, left_on='next_month', right_on='date',
+        suffixes=('_1st', '_subseq')
     )
     monthly['ghs_used'] = (
         monthly['credit_ghs_fixed_1st'] 
@@ -318,7 +327,8 @@ def calc_monthly_usage(prefix, df=None, top_up=None, outname=None):
     monthly = (
         monthly[
             [
-                'date_1st', 'date_subseq', 'credit_ghs_fixed_1st', 'credit_ghs_fixed_subseq', 'ghs_used'
+                'date_1st', 'date_subseq', 'credit_ghs_fixed_1st', 
+                'credit_ghs_fixed_subseq', 'ghs_used'
             ]
         ]
     )
@@ -327,10 +337,9 @@ def calc_monthly_usage(prefix, df=None, top_up=None, outname=None):
     # Amount used in February
     if prefix == 'elec':
         top_up_len = len(top_up)
-        original_credit = 1329.54 ## This is an estimate
+        original_credit = 1329.54 # This is an estimate
         march_first_credit = monthly.iloc[0]['credit_ghs_fixed_1st']
         original_credit_adj = original_credit + sum(top_up[0:top_up_len])
-        #print(f"Adjusted original credit = {original_credit_adj}\n")
         first_row = pd.DataFrame(
             {
                 'date': ['2023-02-01'],
@@ -395,7 +404,8 @@ def ac_t_test(prefix, df=None, outname=None):
     alpha = 0.05
     t_stat, p_value = do_t_test(
         data1=df_AC, data2=df_noAC, data1_name='Credit Used with AC',
-        data2_name='Credit Used without AC', equal_var=False, alpha=alpha, outname=outname
+        data2_name='Credit Used without AC', equal_var=False, alpha=alpha, 
+        outname=outname
     )
     print(f"t_stat = {t_stat}\np_value = {p_value}\n")
     
@@ -419,10 +429,9 @@ def ac_anova_test(prefix, df=None, outname=None):
     
     print(f"f_stat = {f_stat}\np_value = {p_value}\n")
 
-# Make predictions                                                    
+# Make predictions of when credit will run out
 def make_predictions(
-        latest_topup_date=None, m_list=None, b_list=None, scipy_linreg=None, 
-        last_row=None, data_part=None):
+        m_list=None, scipy_linreg=None, last_row=None, data_part=None):
     print("="*60)
     print(
         f"Now making Predictions for when credit will run out. Using part "
@@ -431,7 +440,6 @@ def make_predictions(
 
     # Get slope
     slope = m_list[data_part - 1]
-    #intercept = b_list[data_part - 1]
 
     # Get slope and intercept error
     slope_err = scipy_linreg[data_part - 1].stderr
@@ -460,15 +468,12 @@ def make_predictions(
     buy_date = buy_date.strftime("%Y-%m-%d")
     today_date = today.strftime("%Y-%m-%d")
         
-    ## Print information 
+    # Print information 
     print(f"Today's date is {today_date}")
     print(f"Today's credit is {ghs_today.round(2)} GHS\n")
     print(f"Credit will run out in {days_left} days on {runout_date}\n")
     print(f"This date has an error of +/- {runout_day_err} days")
-
-    return (
-        today_date, ghs_today, days_left, runout_date, buy_date, runout_day_err
-    )
+    return (today_date, runout_date, buy_date, runout_day_err)
 
 # Calculate x intercept and it's error
 def calc_x_intercept(
@@ -479,12 +484,14 @@ def calc_x_intercept(
             (intercept_err / intercept) ** 2 + (slope_err / slope) ** 2
         ) ** 0.5
     )
-
     return x_intercept, x_intercept_err
 
 # Update calendar with new predictions  
 def update_google_calendar(
-        prefix=None, calendar_id=None, json_keyfile=None, pred_file=None, today_date=None, latest_topup_date=True, runout_date=None, runout_day_err=None, buy_date=None):
+        prefix=None, calendar_id=None, json_keyfile=None, pred_file=None,
+        today_date=None, latest_topup_date=True, runout_date=None, 
+        runout_day_err=None, buy_date=None):
+    utility = {'elec': 'Electricity', 'wifi': 'WiFi'}    
     # Load Prediction file
     data = pd.read_table(pred_file)
     df_pred = pd.DataFrame(data)
@@ -493,7 +500,7 @@ def update_google_calendar(
     last_date, last_runout_date, last_topup_date, last_eventID_pred, \
         last_eventID_buy, last_pred_error = df_pred.iloc[-1]
 
-    utility = {'elec': 'Electricity', 'wifi': 'WiFi'}    
+
     # Initialize Calendar
     service = initialize_gcal(json_keyfile)
     
@@ -531,23 +538,22 @@ def update_google_calendar(
         else:
             print(f"Error: {e}\n")
             
-    # Add Electricity runs out event to calendar
-    summary_text = f'{utility[prefix]} runs out (' + today_date + ' prediction)'
+    # Add "Electricity runs out" event to calendar
+    summary_text = (f'{utility[prefix]} runs out ({today_date} prediction)')
     eventID_pred, link_pred = add_event_allday(
         calendar_id, summary_text, runout_date, runout_date, 'GMT', service
     )
     
-    # Add Buy Electricity event to calendar
-    summary_text = f'Buy {utility[prefix]} (' + today_date + ' prediction)'
+    # Add "Buy Electricity event" to calendar
+    summary_text = (f'Buy {utility[prefix]} ({today_date} prediction)')
     eventID_buy, link_buy = add_event_allday(
         calendar_id, summary_text, buy_date, buy_date, 'GMT', service
     )
     
-    ## Write calendar information to file
+    # Write calendar information to file
     with open(pred_file, "a") as file:
         #file.write("today_date\trunout_date\teventID_pred\teventID_buy\n")
         file.write(
             f"{today_date}\t{runout_date}\t{latest_topup_date}\t{eventID_pred}"
             f"\t{eventID_buy}\t{runout_day_err}\n"
         )
-
