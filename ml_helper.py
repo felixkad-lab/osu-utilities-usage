@@ -1,11 +1,9 @@
-import sys
 from scipy import stats
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import root_mean_squared_error
-from sklearn.metrics import r2_score
+from sklearn.metrics import root_mean_squared_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
@@ -152,67 +150,3 @@ def predict_ac_use(data=None, figname=None, outname=None):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     fig = disp.plot()
     plt.savefig(figname, dpi=300, bbox_inches='tight')
-    #plt.close(fig)
-
-# Classification algorithms
-def do_classification(model_choice=None, param_dict=None):
-    if model_choice in ['XGBC', 'xgboost', 'XGBClassifier']:
-        # xgboost
-        model = XGBClassifier(**param_dict)
-    elif model_choice in ['LGBMC', 'lightgbm', 'LGBMClassifier']:
-        # LightGBM classifier        
-        model = LGBMClassifier(**param_dict)        
-    elif model_choice in ['Logis', 'LogisticRegression']:
-        # Logistic Regression Classifier
-        from sklearn.linear_model import LogisticRegression
-        model = LogisticRegression(**param_dict)
-    elif model_choice in ['RandForC', 'RandomForest', 'randomforest', 'random_forest', 'RandomForestClassifier']:
-        ## Random Forest classifier
-        from sklearn.ensemble import RandomForestClassifier
-        model = RandomForestClassifier(**param_dict) 
-    elif model_choice in ['SVC', 'support_vector', 'support_vector_machine', 'svm', 'svc', 'SVM']:
-        ## Support Vector Machine (SVM) 
-        from sklearn.svm import SVC
-        model = SVC(**param_dict) 
-    elif model_choice in [
-        'KNN', 'nearest_neighbors', 'KNeighborsClassifier', 'KNNC', 'KNNClassifier'
-        ]:
-        # K-Nearest Neighbor (KNN)
-        from sklearn.neighbors import KNeighborsClassifier
-        model = KNeighborsClassifier(**param_dict)
-    elif model_choice in ['Neural', 'neural_network', 'deep_learning', 'deepL']:
-        # Neureal Network (Deep Learning)
-        from sklearn.neural_network import MLPClassifier
-        model = MLPClassifier(**param_dict)
-    elif model_choice in [
-        'DeciTree', 'DecisionTreeClassifier', 'decision_tree', 'DecisionTree'
-        ]:
-        # Decision Tree Classifier
-        from sklearn.tree import DecisionTreeClassifier
-        model = DecisionTreeClassifier(**param_dict)        
-    else:
-        print(f"I don't know {model_choice} model. Quitting.")
-        sys.exit(1)
-        
-    return model
-                      
-# Classification algorithms
-def tune_hyperparameters(
-        model=None, X_train=None, y_train=None, algo_type=None, 
-        param_grid=None):
-    if algo_type in ['grid_search', 'GridSearch', 'GridSearchCV']:
-        # GridSearchCV from sklearn
-        from sklearn.model_selection import GridSearchCV
-
-        #model = GridSearchCV(model, param_grid, n_jobs=-1, cv=5)
-        clf = GridSearchCV(model, param_grid, n_jobs=-1, cv=5)
-        search = clf.fit(X_train, y_train)
-    elif algo_type in [
-        'random_search', 'RandomSearch', 'RandomSearchCV', 'RandomizedSearchCV'
-        ]:
-        from sklearn.model_selection import RandomizedSearchCV   
-    else:
-        print(f"I don't know {algo_type} algorithm for tuning hyperparameters. Quitting.")
-        sys.exit(1)
-
-    return search.best_params_
