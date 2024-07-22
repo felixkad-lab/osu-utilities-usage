@@ -150,3 +150,4 @@ def predict_ac_use(data=None, figname=None, outname=None):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     fig = disp.plot()
     plt.savefig(figname, dpi=300, bbox_inches='tight')
+    
