@@ -118,7 +118,6 @@ def predict_ac_use(data=None, figname=None, outname=None):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, stratify=y, test_size=0.1, random_state=42
     )
-
     y_test.name = 'y_test'
 
     print(f"Shapes:\nX_train = {X_train.shape}\ty_train = {y_train.shape}")
