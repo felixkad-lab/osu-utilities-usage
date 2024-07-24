@@ -5,20 +5,17 @@ from ml_helper import do_linear_regression, regression_by_parts
 
 # Graph of Credit (GHS) vs day (Raw and Fixed)
 def plot_raw_and_fixed_credits(
-          df=None, x_lim=None, y_lim=None, xtick_step=None, figsize=None,figname=None):
+          df=None, x_lim=None, y_lim=None, xtick_step=None, xlabels=None,
+          ylabels=None, titles=None, figsize=None,figname=None):
     print("="*60)
-    print("Making a graph of Credit vs Day for Raw and Fixed Data\n")
-        
+    print(
+        "Making a graph of Credit vs Day for Raw Data and "
+        "Data with Normalized baseline"
+    )
+    # Create graph canvas and define properties    
     fig, axes = plt.subplots(2, 1, figsize=figsize)
-        
     x_min = x_lim[0]; x_max = x_lim[1]
     y_min = y_lim[0]; y_max = y_lim[1]
-    xlabels = ['', 'Day Count']
-    ylabels = ['Credit (GHS)', 'Credit (GHS)']
-    titles = [
-        'Credit (GHS) vs Day for Raw Data', 
-        'Credit vs Day (Normalized baseline)'
-    ]
     xlim = [x_min, x_max]
     ylim = [y_min, y_max]
     xtick_values = np.arange(0, x_max + 1, 20)
@@ -127,29 +124,30 @@ def make_boxplot(
     plt.close(fig)
 
 # Plot Weekly usage
-def plot_weekly_usage(df=None, figsize=None, figname=None):
+def plot_weekly_usage(
+        df=None, figsize=None, ylabel=None, title=None, figname=None):
     print("="*60)
     print("Making a plot of Weekly used\n")
     # Make graph
     fig, ax = plt.subplots(figsize=figsize)
     ax = gr.make_barplot(
         data=df, x='week', y='ghs_used', orient='v', xlabel='Week',
-        ylabel='Credit Used (GHS)', title='Weekly Usage (GHS)', ax=ax, add_bar_labels=False
+        ylabel=ylabel, title=title, ax=ax, add_bar_labels=False
     )
         
     # Save graph
     plt.savefig(figname, dpi=300, bbox_inches='tight')
     plt.close(fig)
     
-
 # Make a graph of date vs ghs_used_monthly
-def plot_monthly_usage(df=None, figsize=None, figname=None):
+def plot_monthly_usage(
+        df=None, ylabel=None, title=None, figsize=None, figname=None):
     df['date'] = df['date'].dt.strftime('%b %y')
         
     fig, ax = plt.subplots(figsize=figsize)
     ax = gr.make_barplot(
         data=df, x='date', y='ghs_used', orient='v', xlabel='Month',
-        ylabel='Credit Used (GHS)', title='Monthly Usage (GHS)', ax=ax, add_bar_labels=False, xlabel_rot=45
+        ylabel=ylabel, title=title, ax=ax, add_bar_labels=False, xlabel_rot=45
     )
         
     # save graph
