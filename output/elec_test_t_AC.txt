@@ -1,0 +1,13 @@
+============================================================
+	T-Test Results
+============================================================
+Mean of Credit Used with AC = 24.333859325396823
+Mean of Credit Used without AC = 6.193208333333303
+
+Variance of Credit Used with AC = 66.57337554123373
+Variance of Credit Used without AC = 4.745961837742463
+
+T-statistics: 30.595853956118958
+P-value: 1.577090109080321e-94
+
+Reject the null hypothesis, i.e., there is a significant difference between Credit Used with AC and Credit Used without AC
