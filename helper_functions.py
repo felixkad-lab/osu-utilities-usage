@@ -1,8 +1,5 @@
-#import os
-import sys
 import math
 import pandas as pd
-import numpy as np
 from googleapiclient.errors import HttpError
 from stats_stuff import do_t_test, do_anova_test
 from google_calendar_helper import (
