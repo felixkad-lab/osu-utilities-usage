@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 from googleapiclient.errors import HttpError
-from stats_stuff import do_t_test, do_anova_test
+from stats_helper import do_t_test, do_anova_test
 from google_calendar_helper import (
     initialize_gcal, add_event_allday, delete_event
 )
