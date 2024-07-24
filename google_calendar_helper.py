@@ -9,7 +9,6 @@ def initialize_gcal(json_keyfile):
         json_keyfile, scopes=['https://www.googleapis.com/auth/calendar']
     )
     service = build('calendar', 'v3', credentials=credentials)
-
     return service
 
 # Add event
@@ -37,14 +36,11 @@ def add_event_allday(
     # Get event info
     event_link = event.get('htmlLink')
     eventID = event['id']
-
     print(f"Event with ID {eventID} added to Calendar successfully\n")
     return eventID, event_link
-
 
 # Delete event                    
 def delete_event(calendar_id, eventID, service):
     # Delete event from Google Calendar
     service.events().delete(calendarId=calendar_id, eventId=eventID).execute()
     print(f"Event with ID {eventID} deleted successfully\n")
-
