@@ -1,0 +1,9 @@
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# My google account 
+osu-electricity-usage-45d9f917513f.json
+google_utils.py
+
+__pycache__/
