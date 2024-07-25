@@ -12,7 +12,6 @@ def elec_linear_regression_all(df_util=None, figname=None):
             eqn_info=['C', 'd', r"\frac{{GHS}}{{day}}", 'GHS'], 
             line_color=['black'], scat_color=['tab:blue'], figname=figname
         )
-    #return x_list, y_list, y_pred, m_list, b_list, scipy_linreg
 
 # Linear regression of Credit vs Day_count and graph for different flatmate 
 # situation
